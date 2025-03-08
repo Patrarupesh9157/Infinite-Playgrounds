@@ -1,6 +1,4 @@
-<p align="center"><a href="https://products.suvidhaexport.com/" target="_blank"><img src="https://products.suvidhaexport.com/images/suvidha-logo.png" width="400" alt="Suvidha Fashion"></a></p>
-
-## Suvidha Fashion
+## Infinite Playgrounds
 
 ## Project Setup steps
 - get project git and clone the project
