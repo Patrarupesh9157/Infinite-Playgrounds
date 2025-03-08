@@ -1,0 +1,9 @@
+.custom-offcanvas-width {
+    width: 40% !important; /* Default width */
+}
+
+@media (max-width: 768px) { /* Adjust breakpoint as needed */
+    .custom-offcanvas-width {
+        width: 100% !important; /* Full width on mobile */
+    }
+}

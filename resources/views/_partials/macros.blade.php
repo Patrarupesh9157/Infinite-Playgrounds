@@ -1,0 +1,1 @@
+<img src="{{ asset('images/logo.png') }}" alt="suvidha" width="225" height="{{ $height }}" class="img-fluid">
