@@ -9,20 +9,8 @@ class GameLike extends Model
 {
     use HasFactory;
 
-    // Define the table associated with the model
+    // Table name (optional if the table follows Laravel's naming convention)
     protected $table = 'game_likes';
-
-    // Primary key of the table
-    protected $primaryKey = 'id';
-
-    // Auto-incrementing key type
-    public $incrementing = true;
-
-    // Data type of the primary key
-    protected $keyType = 'bigint';
-
-    // Timestamps (enabled by default in Laravel)
-    public $timestamps = true;
 
     // Mass assignable attributes
     protected $fillable = [

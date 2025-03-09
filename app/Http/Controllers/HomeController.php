@@ -100,7 +100,7 @@ class HomeController extends Controller
         GameReview::create([
             'game_id' => $id,
             'user_id' => auth()->id(),
-            'review' => $request->review,
+            'comment' => $request->review,
             'rating' => $request->rating
         ]);
 

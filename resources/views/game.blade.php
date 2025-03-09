@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Games - Infinite Playgrounds')
+
 @section('content')
     <!-- ... previous header content ... -->
 
@@ -26,9 +28,12 @@
                     <div class="game-stats mb-4">
                         <div class="d-flex align-items-center gap-4">
                             <div class="likes-section">
-                                <button class="btn {{ $userHasLiked ? 'btn-danger' : 'btn-outline-danger' }} like-btn" 
+                                <button class="btn {{ $userHasLiked ? 'btn-danger' : 'btn-outline-danger' }} like-btn"
                                         data-game-id="{{ $game->id }}"
-                                        @guest disabled @endguest>
+                                        @guest disabled @endguest
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="{{ auth()->check() ? '' : 'Login to like this game' }}">
                                     <i class="fa fa-heart"></i>
                                     <span class="likes-count">{{ $game->likes_count }}</span>
                                 </button>
@@ -115,6 +120,15 @@
                                                 </div>
                                                 <button type="submit" class="btn btn-primary">Submit Review</button>
                                             </form>
+                                            @if ($errors->any())
+                                                <div class="alert alert-danger">
+                                                    <ul>
+                                                        @foreach ($errors->all() as $error)
+                                                            <li>{{ $error }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endif
                                         </div>
                                     @else
                                         <div class="alert alert-info">
@@ -137,7 +151,7 @@
                                                     </div>
                                                     <small class="text-muted">{{ $review->created_at->diffForHumans() }}</small>
                                                 </div>
-                                                <p class="mt-2">{{ $review->review }}</p>
+                                                <p class="mt-2">{{ $review->comment }}</p>
                                             </div>
                                             @unless($loop->last)
                                                 <hr>
@@ -189,9 +203,50 @@
         }
         .like-btn {
             padding: 8px 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
+
+        .like-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .like-btn:active {
+            transform: scale(0.95);
+        }
+
         .like-btn i {
             margin-right: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .like-btn.liked i {
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Tooltip styling */
+        .tooltip-inner {
+            background-color: #333;
+            color: #fff;
+            border-radius: 4px;
+            padding: 5px 10px;
+        }
+
+        .tooltip.bs-tooltip-top .tooltip-arrow::before {
+            border-top-color: #333;
         }
     </style>
 @endpush
@@ -199,7 +254,9 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('.like-btn').click(function() {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+            $('.like-btn').click(function(e) {
+                e.preventDefault();
                 @guest
                     window.location.href = "{{ route('login') }}";
                     return;
@@ -217,10 +274,19 @@
                     success: function(response) {
                         if (response.action === 'liked') {
                             btn.removeClass('btn-outline-danger').addClass('btn-danger');
+                            btn.addClass('liked');
                         } else {
                             btn.removeClass('btn-danger').addClass('btn-outline-danger');
                         }
                         btn.find('.likes-count').text(response.likes_count);
+
+                        // Remove the animation class after the animation ends
+                        setTimeout(() => {
+                            btn.removeClass('liked');
+                        }, 500);
+                    },
+                    error: function(xhr) {
+                        alert('An error occurred. Please try again.');
                     }
                 });
             });

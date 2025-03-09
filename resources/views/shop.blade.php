@@ -2,67 +2,6 @@
 
 @section('title', 'Games - Infinite Playgrounds')
 
-@section('content')
-    <div class="page-heading header-text">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h3>Our Games</h3>
-                    <span class="breadcrumb">
-                        <a href="{{ route('home') }}">Home</a> > Our Games
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="section trending">
-        <div class="container">
-            <div class="row trending-box">
-                @forelse($games as $game)
-                    <div class="col-lg-3 col-md-6 align-self-center mb-30">
-                        <div class="item">
-                            <div class="thumb">
-                                <a href="{{ route('game.details', $game->id) }}">
-                                    @dump($game->images)
-                                    @if(!empty($game->images))
-                                        @php
-                                        $images = json_decode($game->images, true)
-                                        
-                                        @endphp
-                                        <img src="{{ asset('storage/' . $images[0]) }}" alt="{{ $game->name }}">
-                                    @else
-                                        <img src="{{ asset('assets/images/placeholder.jpg') }}" alt="{{ $game->name }}">
-                                    @endif
-                                </a>
-                            </div>
-                            <div class="down-content">
-                                <h4>{{ $game->name }}</h4>
-                                <p class="text-truncate">{{ $game->description }}</p>
-                                <div class="mt-2">
-                                    <small class="text-muted">Created: {{ $game->created_at }}</small>
-                                </div>
-                                <a href="{{ route('game.details', $game->id) }}" class="btn btn-sm btn-primary mt-2">
-                                    Play Now
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-12 text-center">
-                        <h4>No games available</h4>
-                    </div>
-                @endforelse
-            </div>
-
-            <div class="row">
-                <div class="col-lg-12">
-                    {{ $games->links('sections.shop.pagination') }}
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
 
 @push('styles')
     <style>
@@ -88,3 +27,67 @@
         }
     </style>
 @endpush
+
+@section('content')
+    <div class="page-heading header-text">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3>Our Games</h3>
+                    <span class="breadcrumb">
+                        <a href="{{ route('home') }}">Home</a> > Our Games
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section trending">
+        <div class="container">
+            <div class="row trending-box">
+                @forelse($games as $game)
+                    <div class="col-lg-3 col-md-6 align-self-center mb-30">
+                        <div class="item">
+                            <div class="thumb">
+                                <a href="{{ route('game.details', $game->id) }}">
+                                    @if(!empty($game->images))
+                                        @php
+                                        $images = json_decode($game->images, true)
+                                        
+                                        @endphp
+                                        <img src="{{ asset('storage/' . $images[0]) }}" alt="{{ $game->name }}">
+                                    @else
+                                        <img src="{{ asset('assets/images/placeholder.jpg') }}" alt="{{ $game->name }}">
+                                    @endif
+                                </a>
+                            </div>
+                            <div class="down-content">
+                                <h4>{{ $game->name }}</h4>
+                                <p class="text-truncate">{{ $game->description }}</p>
+                                <div class="mt-2">
+                                    <small class="text-muted">Created: {{ $game->created_at }}</small>
+                                </div>
+                                <div class="mt-2 d-flex justify-content-center align-items-center">
+                                    <a href="{{ route('game.details', $game->id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-play"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center">
+                        <h4>No games available</h4>
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    {{ $games->links('sections.shop.pagination') }}
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+

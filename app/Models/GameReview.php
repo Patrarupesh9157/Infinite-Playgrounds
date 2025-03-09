@@ -16,7 +16,7 @@ class GameReview extends Model
     protected $fillable = [
         'game_id',
         'user_id',
-        'review',
+        'comment',
         'rating',
     ];
 
