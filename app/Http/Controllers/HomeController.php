@@ -44,7 +44,7 @@ class HomeController extends Controller
             ->with('user')
             ->latest()
             ->get();
-        
+
         $userHasLiked = false;
         if (auth()->check()) {
             $userHasLiked = GameLike::where('game_id', $id)
@@ -53,7 +53,7 @@ class HomeController extends Controller
         }
 
         $averageRating = $reviews->avg('rating');
-        
+
         return view('game', compact('game', 'reviews', 'userHasLiked', 'averageRating'));
     }
 
@@ -193,6 +193,31 @@ class HomeController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');
+    }
+
+
+    public function getAdminCountData()
+    {
+        // Get total games count
+        $gamesCount = Game::count();
+
+        // Get total likes count
+        $likesCount = GameLike::count();
+
+        // Get total reviews count
+        $reviewsCount = GameReview::count();
+
+        // You can also add more specific counts if needed
+        // $usersCount = User::count();
+        // $contactsCount = Contact::count();
+
+        return response()->json([
+            'games' => $gamesCount,
+            'likes' => $likesCount,
+            'reviews' => $reviewsCount,
+            // 'users' => $usersCount,
+            // 'contacts' => $contactsCount,
+        ]);
     }
 
 }

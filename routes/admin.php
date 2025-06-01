@@ -16,16 +16,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['auth:admin'])->group(function () {
         Route::resource('games', GameController::class);
         Route::get('get-admin-count-data', [HomeController::class, 'getAdminCountData'])->name('dashboard.getAdminCountData');
-        // Route::resource('products', ProductController::class);
-        // Route::prefix('category')->name('category.')->group(function () {
-        //     // Resource routes for each category
-        //     Route::resource('concept', ConceptController::class);
-        //     Route::resource('yarn', YarnController::class);
-        //     Route::resource('area', AreaController::class);
-        //     Route::resource('fabric', FabricController::class);
-        //     Route::resource('technically-concept', TechnicallyConceptController::class);
-        //     Route::resource('panna', PannaController::class);
-        //     Route::resource('usein', UseInController::class);
-        // });
     });
 });
