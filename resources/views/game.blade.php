@@ -3,8 +3,6 @@
 @section('title', 'Games - Infinite Playgrounds')
 
 @section('content')
-    <!-- ... previous header content ... -->
-
     <div class="single-product section">
         <div class="container">
             <div class="row">
@@ -15,9 +13,9 @@
                                 $images = json_decode($game->images);
                                 $firstImage = $images[0];
                             @endphp
-                            <img src="{{ asset('storage/' . $firstImage) }}" alt="{{ $game->name }}">
+                            <img src="{{ asset('storage/' . $firstImage) }}" alt="{{ $game->name }}" class="img-fluid rounded shadow">
                         @else
-                            <img src="{{ asset('assets/images/placeholder.jpg') }}" alt="{{ $game->name }}">
+                            <img src="{{ asset('assets/images/placeholder.jpg') }}" alt="{{ $game->name }}" class="img-fluid rounded shadow">
                         @endif
                     </div>
                 </div>
@@ -52,9 +50,9 @@
                     <p>{{ $game->description }}</p>
                     
                     <div class="d-grid gap-2">
-                        <button class="btn btn-primary btn-lg" type="button" onclick="openGamePopup()">
-                            <i class="fa fa-gamepad"></i> Play Now
-                        </button>
+                        <a  href="{{ route('games.play', $game->id) }}" class="btn btn-primary btn-lg play-button">
+                            <i class="fa fa-gamepad me-2"></i> Play Now
+                        </a>
                     </div>
                 </div>
             </div>
@@ -70,162 +68,190 @@
                             <div class="nav-wrapper">
                                 <ul class="nav nav-tabs" role="tablist">
                                     <li class="nav-item">
-                                        <button class="nav-link active" id="game-tab" data-bs-toggle="tab" 
-                                                data-bs-target="#game" type="button" role="tab">
-                                            Game
-                                        </button>
-                                    </li>
-                                    <li class="nav-item">
-                                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" 
+                                        <button class="nav-link active" id="reviews-tab" data-bs-toggle="tab" 
                                                 data-bs-target="#reviews" type="button" role="tab">
-                                            Reviews ({{ $reviews->count() }})
+                                            <i class="fa fa-comments me-2"></i> Reviews ({{ $reviews->count() }})
                                         </button>
                                     </li>
                                     <li class="nav-item">
                                         <button class="nav-link" id="code-tab" data-bs-toggle="tab" 
                                                 data-bs-target="#code" type="button" role="tab">
-                                            Code
+                                            <i class="fa fa-code me-2"></i> Code
                                         </button>
                                     </li>
                                 </ul>
                             </div>              
                             <div class="tab-content" id="myTabContent">
-                                <!-- Game Tab -->
-                                <div class="tab-pane fade show active" id="game" role="tabpanel">
-                                    <div class="game-container">
-                                        <div class="text-center p-5">
-                                            <i class="fa fa-gamepad fa-4x text-primary mb-3"></i>
-                                            <h4>Ready to Play?</h4>
-                                            <p class="text-muted mb-4">Click the "Play Now" button above to launch the game in a popup window.</p>
-                                            <button class="btn btn-primary" onclick="openGamePopup()">
-                                                <i class="fa fa-play"></i> Launch Game
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <!-- Reviews Tab -->
-                                <div class="tab-pane fade" id="reviews" role="tabpanel">
-                                    <!-- Review Form -->
-                                    @auth
-                                        <div class="review-form mb-4">
-                                            <h5>Write a Review</h5>
-                                            <form action="{{ route('game.review', $game->id) }}" method="POST">
-                                                @csrf
-                                                <div class="mb-3">
-                                                    <label class="form-label">Rating</label>
-                                                    <div class="rating-input">
-                                                        @for($i = 5; $i >= 1; $i--)
-                                                            <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}" required>
-                                                            <label for="star{{ $i }}"><i class="fa fa-star"></i></label>
+                                <div class="tab-pane fade show active" id="reviews" role="tabpanel">
+                                    <div class="reviews-container p-4 bg-white rounded shadow-sm">
+                                        <!-- Review Stats Summary -->
+                                        <div class="review-summary mb-4">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-4 text-center border-end">
+                                                    <h2 class="display-4 mb-0">{{ number_format($averageRating, 1) }}</h2>
+                                                    <div class="stars mb-2">
+                                                        @for($i = 1; $i <= 5; $i++)
+                                                            <i class="fa fa-star{{ $i <= round($averageRating) ? ' text-warning' : '-o' }} fs-4"></i>
                                                         @endfor
                                                     </div>
+                                                    <p class="text-muted">{{ $reviews->count() }} {{ \Illuminate\Support\Str::plural('review', $reviews->count()) }}</p>
                                                 </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Your Review</label>
-                                                    <textarea class="form-control" name="review" rows="3" required></textarea>
+                                                <div class="col-md-8">
+                                                    @php
+                                                        $ratingCounts = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+                                                        foreach($reviews as $review) {
+                                                            $ratingCounts[$review->rating]++;
+                                                        }
+                                                    @endphp
+                                                    
+                                                    @for($i = 5; $i >= 1; $i--)
+                                                        @php
+                                                            $percentage = $reviews->count() > 0 ? ($ratingCounts[$i] / $reviews->count()) * 100 : 0;
+                                                        @endphp
+                                                        <div class="rating-bar d-flex align-items-center mb-2">
+                                                            <span class="me-2">{{ $i }} <i class="fa fa-star text-warning"></i></span>
+                                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $percentage }}%"></div>
+                                                            </div>
+                                                            <span class="ms-2 text-muted small">{{ $ratingCounts[$i] }}</span>
+                                                        </div>
+                                                    @endfor
                                                 </div>
-                                                <button type="submit" class="btn btn-primary">Submit Review</button>
-                                            </form>
-                                            @if ($errors->any())
-                                                <div class="alert alert-danger">
-                                                    <ul>
-                                                        @foreach ($errors->all() as $error)
-                                                            <li>{{ $error }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            @endif
+                                            </div>
                                         </div>
-                                    @else
-                                        <div class="alert alert-info">
-                                            Please <a href="{{ route('login') }}">login</a> to write a review.
-                                        </div>
-                                    @endauth
-
-                                    <!-- Reviews List -->
-                                    <div class="reviews-list">
-                                        @forelse($reviews as $review)
-                                            <div class="review-item mb-4">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <h6>{{ $review->user->name }}</h6>
-                                                        <div class="stars">
-                                                            @for($i = 1; $i <= 5; $i++)
-                                                                <i class="fa fa-star{{ $i <= $review->rating ? ' text-warning' : '-o' }}"></i>
+                                        
+                                        <hr>
+                                        
+                                        <!-- Review Form -->
+                                        @auth
+                                            <div class="review-form mb-4 mt-4">
+                                                <h5 class="mb-3"><i class="fa fa-pencil me-2"></i>Write a Review</h5>
+                                                <form action="{{ route('game.review', $game->id) }}" method="POST" class="bg-light p-4 rounded">
+                                                    @csrf
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Your Rating</label>
+                                                        <div class="rating-input text-center">
+                                                            @for($i = 5; $i >= 1; $i--)
+                                                                <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}" required>
+                                                                <label for="star{{ $i }}"><i class="fa fa-star"></i></label>
                                                             @endfor
                                                         </div>
                                                     </div>
-                                                    <small class="text-muted">{{ $review->created_at->diffForHumans() }}</small>
-                                                </div>
-                                                <p class="mt-2">{{ $review->comment }}</p>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Your Review</label>
+                                                        <textarea class="form-control" name="review" rows="3" placeholder="Share your thoughts about this game..." required></textarea>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fa fa-paper-plane me-1"></i> Submit Review
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                                @if ($errors->any())
+                                                    <div class="alert alert-danger mt-3">
+                                                        <ul class="mb-0">
+                                                            @foreach ($errors->all() as $error)
+                                                                <li>{{ $error }}</li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                @endif
                                             </div>
-                                            @unless($loop->last)
-                                                <hr>
-                                            @endunless
-                                        @empty
-                                            <p class="text-muted">No reviews yet. Be the first to review!</p>
-                                        @endforelse
+                                        @else
+                                            <div class="alert alert-info">
+                                                <i class="fa fa-info-circle me-2"></i> Please <a href="{{ route('login') }}" class="alert-link">login</a> to write a review.
+                                            </div>
+                                        @endauth
+
+                                        <!-- Reviews List -->
+                                        <div class="reviews-list mt-4">
+                                            <h5 class="mb-3"><i class="fa fa-comments me-2"></i>User Reviews</h5>
+                                            
+                                            @forelse($reviews as $review)
+                                                <div class="review-item mb-4">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div class="d-flex">
+                                                            <div class="avatar me-3">
+                                                                <div class="avatar-circle">
+                                                                    {{ strtoupper(substr($review->user->name, 0, 1)) }}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-1">{{ $review->user->name }}</h6>
+                                                                <div class="stars mb-1">
+                                                                    @for($i = 1; $i <= 5; $i++)
+                                                                        <i class="fa fa-star{{ $i <= $review->rating ? ' text-warning' : '-o' }}"></i>
+                                                                    @endfor
+                                                                    <span class="text-muted ms-2 small">{{ $review->created_at->diffForHumans() }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="review-content mt-2">
+                                                        <p class="mb-0">{{ $review->comment }}</p>
+                                                    </div>
+                                                </div>
+                                                @unless($loop->last)
+                                                    <hr>
+                                                @endunless
+                                            @empty
+                                                <div class="text-center py-5">
+                                                    <i class="fa fa-comments-o fa-3x text-muted mb-3"></i>
+                                                    <p class="text-muted">No reviews yet. Be the first to review this game!</p>
+                                                </div>
+                                            @endforelse
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Code Tab -->
                                 <div class="tab-pane fade" id="code" role="tabpanel">
-                                    <div class="code-section">
-                                        @if($game->html_code)
-                                            <div class="code-block">
-                                                <div class="code-header d-flex justify-content-between align-items-center">
-                                                    <h6 class="mb-0"><i class="fab fa-html5 text-danger me-2"></i>Game Source Code</h6>
-                                                    <button class="btn btn-sm btn-outline-secondary" onclick="copyCode('game-source-code')">
-                                                        <i class="fa fa-copy me-1"></i>Copy Code
+                                    <div class="code-container">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5><i class="fa fa-code me-2"></i> Game Code</h5>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-primary code-tab-btn active" data-target="html">HTML</button>
+                                                <button class="btn btn-sm btn-outline-primary code-tab-btn" data-target="css">CSS</button>
+                                                <button class="btn btn-sm btn-outline-primary code-tab-btn" data-target="js">JavaScript</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="code-content">
+                                            <div class="code-tab-content active" id="html-code">
+                                                <div class="code-header d-flex justify-content-between align-items-center bg-light p-2 rounded-top">
+                                                    <span>HTML</span>
+                                                    <button class="btn btn-sm btn-primary copy-code" data-code-type="html">
+                                                        <i class="fa fa-copy me-1"></i> Copy
                                                     </button>
                                                 </div>
-                                                <pre class="code-content"><code id="game-source-code">{{ $game->html_code }}</code></pre>
+                                                <pre class="bg-dark text-light p-3 rounded-bottom mb-0"><code class="html">{{ $game->html_code ?? '<div class="game-container">Game HTML code will appear here</div>' }}</code></pre>
                                             </div>
-                                        @else
-                                            <div class="no-code text-center py-5">
-                                                <i class="fa fa-code fa-4x text-muted mb-3"></i>
-                                                <h5>No Source Code Available</h5>
-                                                <p class="text-muted">The source code for this game is not available for viewing.</p>
+                                            
+                                            <div class="code-tab-content" id="css-code" style="display: none;">
+                                                <div class="code-header d-flex justify-content-between align-items-center bg-light p-2 rounded-top">
+                                                    <span>CSS</span>
+                                                    <button class="btn btn-sm btn-primary copy-code" data-code-type="css">
+                                                        <i class="fa fa-copy me-1"></i> Copy
+                                                    </button>
+                                                </div>
+                                                <pre class="bg-dark text-light p-3 rounded-bottom mb-0"><code class="css">{{ $game->css_code ?? '/* Game CSS code will appear here */' }}</code></pre>
                                             </div>
-                                        @endif
+                                            
+                                            <div class="code-tab-content" id="js-code" style="display: none;">
+                                                <div class="code-header d-flex justify-content-between align-items-center bg-light p-2 rounded-top">
+                                                    <span>JavaScript</span>
+                                                    <button class="btn btn-sm btn-primary copy-code" data-code-type="js">
+                                                        <i class="fa fa-copy me-1"></i> Copy
+                                                    </button>
+                                                </div>
+                                                <pre class="bg-dark text-light p-3 rounded-bottom mb-0"><code class="javascript">{{ $game->js_code ?? '// Game JavaScript code will appear here' }}</code></pre>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Game Popup Modal -->
-    <div class="modal fade" id="gameModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title">
-                        <i class="fa fa-gamepad me-2"></i>
-                        {{ $game->name }}
-                    </h5>
-                    <div class="game-controls">
-                        <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="restartGame()">
-                            <i class="fa fa-redo"></i> Restart
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-light" data-bs-dismiss="modal">
-                            <i class="fa fa-times"></i> Close
-                        </button>
-                    </div>
-                </div>
-                <div class="modal-body p-0">
-                    <div id="gameContainer" class="game-iframe-container">
-                        <!-- Game content will be loaded here -->
-                        <div class="game-loading">
-                            <div class="loading-spinner">
-                                <i class="fa fa-spinner fa-spin fa-3x"></i>
-                            </div>
-                            <h4>Loading Game...</h4>
-                            <p>Please wait while the game initializes</p>
                         </div>
                     </div>
                 </div>
@@ -236,6 +262,7 @@
 
 @push('styles')
     <style>
+        /* Rating system styling */
         .rating-input {
             display: flex;
             flex-direction: row-reverse;
@@ -246,208 +273,102 @@
         }
         .rating-input label {
             cursor: pointer;
-            font-size: 1.5em;
+            font-size: 2em;
             color: #ddd;
-            padding: 0 2px;
+            padding: 0 5px;
+            transition: all 0.2s ease;
         }
         .rating-input label:hover,
         .rating-input label:hover ~ label,
         .rating-input input:checked ~ label {
             color: #ffd700;
+            transform: scale(1.1);
         }
+        
+        /* Review item styling */
         .review-item {
             background: #f8f9fa;
             padding: 15px;
             border-radius: 8px;
+            transition: all 0.2s ease;
         }
+        
+        .review-item:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        /* Avatar circle */
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        /* Review form styling */
+        .review-form form {
+            border: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        
+        .review-form form:focus-within {
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+        }
+        
+        /* Like button styling */
         .like-btn {
             padding: 8px 16px;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .like-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .like-btn:active {
-            transform: scale(0.95);
         }
 
         .like-btn i {
             margin-right: 5px;
-            transition: transform 0.3s ease;
         }
-
-        .like-btn.liked i {
-            animation: pulse 0.5s ease;
+        
+        /* Code display styling */
+        pre {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 0;
+            border-radius: 0 0 5px 5px;
         }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.2);
-            }
-            100% {
-                transform: scale(1);
-            }
+        
+        .code-tab-btn {
+            font-size: 0.85rem;
+            padding: 4px 10px;
         }
-
-        /* Game Popup Styles */
-        .game-iframe-container {
-            width: 100%;
-            height: calc(100vh - 60px);
-            background: #f8f9fa;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .game-content-frame {
-            width: 100%;
-            height: 100%;
-            background: white;
-            border: none;
-            padding: 20px;
-            overflow: auto;
-        }
-
-        .game-loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #666;
-        }
-
-        .loading-spinner {
-            margin-bottom: 20px;
-            color: #007bff;
-        }
-
-        .modal-fullscreen .modal-content {
-            border-radius: 0;
-        }
-
-        .modal-header {
-            border-bottom: 2px solid #495057;
-        }
-
-        .game-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .game-controls .btn {
-            border-radius: 20px;
-            font-size: 12px;
-            padding: 5px 15px;
-        }
-
-        /* Code Section Styles */
-        .code-block {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .code-header {
-            background: #343a40;
+        
+        .code-tab-btn.active {
+            background-color: #007bff;
             color: white;
-            padding: 15px 20px;
         }
-
-        .code-content {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 20px;
-            overflow-x: auto;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            max-height: 500px;
-            margin: 0;
+        
+        /* Reviews container */
+        .reviews-container {
+            border: 1px solid #eee;
         }
-
-        .no-code {
-            background: white;
-            border-radius: 8px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Tooltip styling */
-        .tooltip-inner {
-            background-color: #333;
-            color: #fff;
+        
+        /* Rating bars */
+        .rating-bar .progress {
             border-radius: 4px;
-            padding: 5px 10px;
+            background-color: #eee;
         }
-
-        .tooltip.bs-tooltip-top .tooltip-arrow::before {
-            border-top-color: #333;
-        }
-
-        /* Game placeholder */
-        .game-container {
-            background: #f8f9fa;
-            border-radius: 10px;
-            min-height: 400px;
-            border: 2px dashed #dee2e6;
-        }
-
-        /* ESC key hint */
-        .esc-hint {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 1060;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .esc-hint.show {
-            opacity: 1;
-        }
-
-        /* Responsive modal on mobile */
-        @media (max-width: 768px) {
-            .game-controls {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .modal-header {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
+        
+        .rating-bar .progress-bar {
+            border-radius: 4px;
         }
     </style>
 @endpush
 
 @push('scripts')
     <script>
-        let gameModal;
-        let gameLoaded = false;
-
         $(document).ready(function() {
-            // Initialize modal
-            gameModal = new bootstrap.Modal(document.getElementById('gameModal'));
-            
             // Initialize tooltips
             $('[data-bs-toggle="tooltip"]').tooltip();
             
@@ -471,199 +392,51 @@
                     success: function(response) {
                         if (response.action === 'liked') {
                             btn.removeClass('btn-outline-danger').addClass('btn-danger');
-                            btn.addClass('liked');
                         } else {
                             btn.removeClass('btn-danger').addClass('btn-outline-danger');
                         }
                         btn.find('.likes-count').text(response.likes_count);
-
-                        // Remove the animation class after the animation ends
-                        setTimeout(() => {
-                            btn.removeClass('liked');
-                        }, 500);
                     },
                     error: function(xhr) {
                         alert('An error occurred. Please try again.');
                     }
                 });
             });
-
-            // ESC key to close modal
-            $(document).keydown(function(e) {
-                if (e.key === 'Escape' && $('#gameModal').hasClass('show')) {
-                    gameModal.hide();
-                }
+            
+            // Code tab switching
+            $('.code-tab-btn').click(function() {
+                const target = $(this).data('target');
+                
+                // Update active button
+                $('.code-tab-btn').removeClass('active');
+                $(this).addClass('active');
+                
+                // Show target content
+                $('.code-tab-content').hide();
+                $(`#${target}-code`).show();
             });
-
-            // Show ESC hint when modal opens
-            $('#gameModal').on('shown.bs.modal', function() {
-                showEscHint();
-            });
-
-            // Clean up when modal closes
-            $('#gameModal').on('hidden.bs.modal', function() {
-                gameLoaded = false;
-                $('#gameContainer').html(`
-                    <div class="game-loading">
-                        <div class="loading-spinner">
-                            <i class="fa fa-spinner fa-spin fa-3x"></i>
-                        </div>
-                        <h4>Loading Game...</h4>
-                        <p>Please wait while the game initializes</p>
-                    </div>
-                `);
-                hideEscHint();
+            
+            // Copy code functionality
+            $('.copy-code').click(function() {
+                const codeType = $(this).data('code-type');
+                const codeContent = $(`#${codeType}-code pre code`).text();
+                
+                // Create temporary textarea
+                const textarea = document.createElement('textarea');
+                textarea.value = codeContent;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                // Update button text temporarily
+                const btn = $(this);
+                const originalText = btn.html();
+                btn.html('<i class="fa fa-check me-1"></i> Copied!');
+                setTimeout(() => {
+                    btn.html(originalText);
+                }, 2000);
             });
         });
-
-        function openGamePopup() {
-            // Show the modal
-            gameModal.show();
-            
-            // Load the game content after modal is shown
-            setTimeout(() => {
-                loadGameContent();
-            }, 300);
-        }
-
-        function loadGameContent() {
-            const gameContainer = $('#gameContainer');
-            
-            @if($game->html_code)
-                // Create game content HTML
-                const gameHTML = `
-                    <div class="game-content-frame">
-                        @if($game->css_code)
-                            <style>
-                                {!! str_replace(["\r", "\n"], '', addslashes($game->css_code)) !!}
-                            </style>
-                        @endif
-                        
-                        <div class="game-html-content">
-                            {!! str_replace(["\r", "\n"], '', addslashes($game->html_code)) !!}
-                        </div>
-                        
-                        @if($game->js_code)
-                            <script>
-                                (function() {
-                                    {!! str_replace(["\r", "\n"], '', addslashes($game->js_code)) !!}
-                                })();
-                            </script>
-                        @endif
-                    </div>
-                `;
-                
-                // Replace loading screen with game content
-                gameContainer.html(gameHTML);
-                gameLoaded = true;
-                
-                // Try to initialize the game
-                setTimeout(() => {
-                    initializeGame();
-                }, 100);
-            @else
-                // No game content available
-                gameContainer.html(`
-                    <div class="game-loading">
-                        <i class="fa fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                        <h4>Game Not Available</h4>
-                        <p>This game hasn't been configured yet.</p>
-                    </div>
-                `);
-            @endif
-        }
-
-        function initializeGame() {
-            // Try to call common game initialization functions
-            try {
-                if (typeof window.startGame === 'function') {
-                    window.startGame();
-                } else if (typeof window.initGame === 'function') {
-                    window.initGame();
-                } else if (typeof window.init === 'function') {
-                    window.init();
-                } else if (typeof window.setup === 'function') {
-                    window.setup();
-                }
-            } catch (error) {
-                console.log('Game initialization:', error);
-            }
-        }
-
-        function restartGame() {
-            if (gameLoaded) {
-                try {
-                    if (typeof window.resetGame === 'function') {
-                        window.resetGame();
-                    } else if (typeof window.restartGame === 'function') {
-                        window.restartGame();
-                    } else if (typeof window.restart === 'function') {
-                        window.restart();
-                    } else {
-                        // Fallback: reload the game content
-                        loadGameContent();
-                    }
-                } catch (error) {
-                    console.log('Game restart:', error);
-                    // Fallback: reload the game content
-                    loadGameContent();
-                }
-            }
-        }
-
-        function showEscHint() {
-            if (!$('.esc-hint').length) {
-                $('body').append(`
-                    <div class="esc-hint">
-                        Press <strong>ESC</strong> to close game
-                    </div>
-                `);
-            }
-            
-            setTimeout(() => {
-                $('.esc-hint').addClass('show');
-            }, 1000);
-            
-            setTimeout(() => {
-                hideEscHint();
-            }, 4000);
-        }
-
-        function hideEscHint() {
-            $('.esc-hint').removeClass('show');
-            setTimeout(() => {
-                $('.esc-hint').remove();
-            }, 300);
-        }
-
-        function copyCode(elementId) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-            
-            const text = element.textContent;
-            
-            navigator.clipboard.writeText(text).then(function() {
-                alert('Code copied to clipboard!');
-            }).catch(function(err) {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                textArea.style.top = '-999999px';
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                
-                try {
-                    document.execCommand('copy');
-                    alert('Code copied to clipboard!');
-                } catch (err) {
-                    alert('Failed to copy code. Please copy manually.');
-                }
-                
-                document.body.removeChild(textArea);
-            });
-        }
     </script>
 @endpush

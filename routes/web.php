@@ -23,6 +23,7 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
     Route::get('/games', 'shop')->name('shop');
     Route::get('/games/{id}', 'game')->name('game.details');
+    Route::get('/games/{id}/play', 'playGame')->name('games.play'); // New route for playing games
     Route::post('/game/{id}/like', 'toggleLike')->name('game.like');
     Route::post('/game/{id}/review', 'storeReview')->name('game.review');
     Route::get('/contact', 'contact')->name('contact');

@@ -56,6 +56,22 @@ class HomeController extends Controller
 
         return view('game', compact('game', 'reviews', 'userHasLiked', 'averageRating'));
     }
+    
+    /**
+     * Display the game in full screen play mode.
+     */
+    public function playGame($id)
+    {
+        $game = Game::findOrFail($id);
+        
+        // Get related games for recommendations
+        $relatedGames = Game::where('id', '!=', $id)
+            ->inRandomOrder()
+            ->take(3)
+            ->get();
+            
+        return view('play', compact('game', 'relatedGames'));
+    }
 
     public function toggleLike($id)
     {
