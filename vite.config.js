@@ -53,15 +53,6 @@ function libsWindowAssignment() {
 }
 
 export default defineConfig({
-  server: {
-    proxy: {
-      '/api': 'http://localhost:9000',
-    },
-    host: true,
-    https: true,
-    port: 5173,
-    strictPort: true,
-  },
   plugins: [
     laravel({
       input: [
