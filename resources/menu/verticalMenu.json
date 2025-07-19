@@ -11,6 +11,24 @@
       "name": "Games",
       "icon": "menu-icon tf-icons ti ti-package",
       "slug": ["admin.games.*"]
+    },
+    {
+      "url": "/admin/users",
+      "name": "Users",
+      "icon": "menu-icon tf-icons ti ti-users",
+      "slug": ["admin.users.*"]
+    },
+    {
+      "url": "/admin/reviews",
+      "name": "Reviews",
+      "icon": "menu-icon tf-icons ti ti-star",
+      "slug": ["admin.reviews.*"]
+    },
+    {
+      "url": "/admin/contacts",
+      "name": "Contact Messages",
+      "icon": "menu-icon tf-icons ti ti-message-circle",
+      "slug": ["admin.contacts.*"]
     }
   ]
 }

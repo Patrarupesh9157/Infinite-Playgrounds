@@ -62,4 +62,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the reviews for this user.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(GameReview::class);
+    }
+
+    /**
+     * Get the likes for this user.
+     */
+    public function likes()
+    {
+        return $this->hasMany(GameLike::class);
+    }
 }
