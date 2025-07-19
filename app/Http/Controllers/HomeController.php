@@ -22,7 +22,18 @@ class HomeController extends Controller
 
     public function index()
     {
-        return view('home');
+        // Get top 5 highest-rated games with at least one review
+        $topRatedGames = Game::withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->with(['reviews' => function($query) {
+                $query->with('user')->orderBy('rating', 'desc')->limit(1);
+            }])
+            ->having('reviews_count', '>=', 1)
+            ->orderByDesc('reviews_avg_rating')
+            ->take(5)
+            ->get();
+
+        return view('home', compact('topRatedGames'));
     }
 
     /**

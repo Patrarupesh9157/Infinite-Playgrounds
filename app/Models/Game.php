@@ -40,4 +40,20 @@ class Game extends Model
     {
         return $this->hasMany(GameReview::class);
     }
+
+    /**
+     * Get the average rating for this game
+     */
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Get the formatted average rating
+     */
+    public function getFormattedAverageRatingAttribute()
+    {
+        return number_format($this->average_rating, 1);
+    }
 }
