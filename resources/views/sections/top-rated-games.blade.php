@@ -50,7 +50,7 @@
                                             <i class="fa fa-star{{ $i <= $topReview->rating ? ' text-warning' : '-o' }}"></i>
                                         @endfor
                                     </div>
-                                    <p class="text-muted small mb-2">{{ Str::limit($topReview->comment, 80) }}</p>
+                                    <p class="text-muted small mb-2">{{ \Illuminate\Support\Str::limit($topReview->comment, 80) }}</p>
                                     <small class="text-muted">- {{ $topReview->user->name }}</small>
                                 </div>
                             @endif

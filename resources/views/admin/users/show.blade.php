@@ -122,7 +122,7 @@
                                                 @endfor
                                                 ({{ $review->rating }}/5)
                                             </td>
-                                            <td>{{ Str::limit($review->comment, 100) }}</td>
+                                            <td>{{ \Illuminate\Support\Str::limit($review->comment, 100) }}</td>
                                             <td>{{ $review->created_at->format('F j, Y') }}</td>
                                         </tr>
                                     @endforeach
